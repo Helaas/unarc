@@ -1,4 +1,4 @@
-// C_LZMA.cpp - интерфейс FreeArc к алгоритму сжатия LZMA
+// C_LZMA.cpp - РёРЅС‚РµСЂС„РµР№СЃ FreeArc Рє Р°Р»РіРѕСЂРёС‚РјСѓ СЃР¶Р°С‚РёСЏ LZMA
 
 #ifdef WIN32
 #include <windows.h>
@@ -45,7 +45,7 @@ static int FindMatchFinder(const char *s)
   return -1;
 }
 
-// Включим в один .o файл все необходимые подпрограммы
+// Р’РєР»СЋС‡РёРј РІ РѕРґРёРЅ .o С„Р°Р№Р» РІСЃРµ РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїРѕРґРїСЂРѕРіСЂР°РјРјС‹
 #include "C/LzmaDec.c"
 #undef kNumFullDistances
 #ifndef FREEARC_DECOMPRESS_ONLY
@@ -207,7 +207,7 @@ int lzma_compress  ( int dictionarySize,
     res = LzmaEnc_Encode(enc, (ISeqOutStream*)&outStream, (ISeqInStream*)&inStream, NULL, &g_Alloc, &g_Alloc);
   LzmaEnc_Destroy(enc, &g_Alloc, &g_Alloc);
 
-  // Вернуть код ошибки входного/выходного потока или перекодировать код ошибки из 7z в fa
+  // Р’РµСЂРЅСѓС‚СЊ РєРѕРґ РѕС€РёР±РєРё РІС…РѕРґРЅРѕРіРѕ/РІС‹С…РѕРґРЅРѕРіРѕ РїРѕС‚РѕРєР° РёР»Рё РїРµСЂРµРєРѕРґРёСЂРѕРІР°С‚СЊ РєРѕРґ РѕС€РёР±РєРё РёР· 7z РІ fa
   if (inStream.errcode)
     return inStream.errcode;
   if (outStream.errcode)
@@ -290,17 +290,17 @@ freeInBuf:
 
 
 /*-------------------------------------------------*/
-/* Реализация класса LZMA_METHOD                  */
+/* Р РµР°Р»РёР·Р°С†РёСЏ РєР»Р°СЃСЃР° LZMA_METHOD                  */
 /*-------------------------------------------------*/
 
-// Если строка str начинается со start, то возвратить адрес остатка, иначе - NULL
+// Р•СЃР»Рё СЃС‚СЂРѕРєР° str РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃРѕ start, С‚Рѕ РІРѕР·РІСЂР°С‚РёС‚СЊ Р°РґСЂРµСЃ РѕСЃС‚Р°С‚РєР°, РёРЅР°С‡Рµ - NULL
 char* start_from (char* str, char* start)
 {
   while (*start && *str==*start)  str++, start++;
   return *start? NULL : str;
 }
 
-// Конструктор, присваивающий параметрам метода сжатия значения по умолчанию
+// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РїСЂРёСЃРІР°РёРІР°СЋС‰РёР№ РїР°СЂР°РјРµС‚СЂР°Рј РјРµС‚РѕРґР° СЃР¶Р°С‚РёСЏ Р·РЅР°С‡РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 LZMA_METHOD::LZMA_METHOD()
 {
   dictionarySize    = 64*mb;
@@ -308,13 +308,13 @@ LZMA_METHOD::LZMA_METHOD()
   algorithm         = 1;
   numFastBytes      = 32;
   matchFinder       = kHT4;
-  matchFinderCycles = 0;    // библиотека LZMA определит количество циклов автоматически, исходя из matchFinder и numFastBytes
+  matchFinderCycles = 0;    // Р±РёР±Р»РёРѕС‚РµРєР° LZMA РѕРїСЂРµРґРµР»РёС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ С†РёРєР»РѕРІ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё, РёСЃС…РѕРґСЏ РёР· matchFinder Рё numFastBytes
   posStateBits      = 2;
   litContextBits    = 3;
   litPosBits        = 0;
 }
 
-// Функция распаковки
+// Р¤СѓРЅРєС†РёСЏ СЂР°СЃРїР°РєРѕРІРєРё
 int LZMA_METHOD::decompress (CALLBACK_FUNC *callback, void *auxdata)
 {
   // Use faster function from DLL if possible
@@ -337,19 +337,19 @@ int LZMA_METHOD::decompress (CALLBACK_FUNC *callback, void *auxdata)
 
 #ifndef FREEARC_DECOMPRESS_ONLY
 
-// Функция упаковки
+// Р¤СѓРЅРєС†РёСЏ СѓРїР°РєРѕРІРєРё
 int LZMA_METHOD::compress (CALLBACK_FUNC *callback, void *auxdata)
 {
   // Use faster function from DLL if possible
   static FARPROC f = LoadFromDLL ("lzma_compress");
   if (!f) f = (FARPROC) lzma_compress;
 
-  SetDictionary (dictionarySize);   // Ограничим размер словаря чтобы сжатие влезало в 4гб памяти :)
-  // Если LZMA будет использовать multithreading алгоритм,
-  // то нет смысла считать время работы по основному треду - вместо этого
-  // следует использовать wall clock time всего процесса упаковки
+  SetDictionary (dictionarySize);   // РћРіСЂР°РЅРёС‡РёРј СЂР°Р·РјРµСЂ СЃР»РѕРІР°СЂСЏ С‡С‚РѕР±С‹ СЃР¶Р°С‚РёРµ РІР»РµР·Р°Р»Рѕ РІ 4РіР± РїР°РјСЏС‚Рё :)
+  // Р•СЃР»Рё LZMA Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ multithreading Р°Р»РіРѕСЂРёС‚Рј,
+  // С‚Рѕ РЅРµС‚ СЃРјС‹СЃР»Р° СЃС‡РёС‚Р°С‚СЊ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РїРѕ РѕСЃРЅРѕРІРЅРѕРјСѓ С‚СЂРµРґСѓ - РІРјРµСЃС‚Рѕ СЌС‚РѕРіРѕ
+  // СЃР»РµРґСѓРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ wall clock time РІСЃРµРіРѕ РїСЂРѕС†РµСЃСЃР° СѓРїР°РєРѕРІРєРё
   if (algorithm && GetCompressionThreads()>1)
-      addtime = -1;   // это сигнал на использование wall clock time
+      addtime = -1;   // СЌС‚Рѕ СЃРёРіРЅР°Р» РЅР° РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ wall clock time
   return ((int (*)(int, int, int, int, int, int, int, int, int, CALLBACK_FUNC*, void*)) f)
                          (dictionarySize,
                           hashSize,
@@ -365,7 +365,7 @@ int LZMA_METHOD::compress (CALLBACK_FUNC *callback, void *auxdata)
 }
 
 
-// Записать в buf[MAX_METHOD_STRLEN] строку, описывающую метод сжатия и его параметры (функция, обратная к parse_LZMA)
+// Р—Р°РїРёСЃР°С‚СЊ РІ buf[MAX_METHOD_STRLEN] СЃС‚СЂРѕРєСѓ, РѕРїРёСЃС‹РІР°СЋС‰СѓСЋ РјРµС‚РѕРґ СЃР¶Р°С‚РёСЏ Рё РµРіРѕ РїР°СЂР°РјРµС‚СЂС‹ (С„СѓРЅРєС†РёСЏ, РѕР±СЂР°С‚РЅР°СЏ Рє parse_LZMA)
 void LZMA_METHOD::ShowCompressionMethod (char *buf)
 {
   char DictionaryStr[100], HashStr[100], fcStr[100], pbStr[100], lcStr[100], lpStr[100], algStr[100];
@@ -393,7 +393,7 @@ void LZMA_METHOD::ShowCompressionMethod (char *buf)
   //printf("\n%s\n",buf);
 }
 
-// Посчитать, сколько памяти требуется для упаковки заданным методом
+// РџРѕСЃС‡РёС‚Р°С‚СЊ, СЃРєРѕР»СЊРєРѕ РїР°РјСЏС‚Рё С‚СЂРµР±СѓРµС‚СЃСЏ РґР»СЏ СѓРїР°РєРѕРІРєРё Р·Р°РґР°РЅРЅС‹Рј РјРµС‚РѕРґРѕРј
 MemSize LZMA_METHOD::GetCompressionMem (void)
 {
   CLzmaEncProps props;
@@ -422,11 +422,11 @@ MemSize LZMA_METHOD::GetCompressionMem (void)
   uint64 sons         = matchFinder==kHT4? 0
                       : matchFinder==kHC4? 1
                       :                    2;
-  // Возращаем значение не более 4gb-1
+  // Р’РѕР·СЂР°С‰Р°РµРј Р·РЅР°С‡РµРЅРёРµ РЅРµ Р±РѕР»РµРµ 4gb-1
   return MemSize (mymin (MemSize(-1), uint64(props.dictSize) + reservedArea + props.hashSize + sons*sizeof(CLzRef)*props.dictSize + 1*mb));
 }
 
-// Вычисляет словарь, использующий не более mem памяти для сжатия заданным LZMA_METHOD
+// Р’С‹С‡РёСЃР»СЏРµС‚ СЃР»РѕРІР°СЂСЊ, РёСЃРїРѕР»СЊР·СѓСЋС‰РёР№ РЅРµ Р±РѕР»РµРµ mem РїР°РјСЏС‚Рё РґР»СЏ СЃР¶Р°С‚РёСЏ Р·Р°РґР°РЅРЅС‹Рј LZMA_METHOD
 MemSize calcDictSize (LZMA_METHOD *p, MemSize mem)
 {
   double mem4 = mymax (double(mem) - BUFFER_SIZE, 0);
@@ -454,27 +454,27 @@ MemSize calcDictSize (LZMA_METHOD *p, MemSize mem)
   return 0;
 }
 
-// Ограничить использование памяти при упаковке
+// РћРіСЂР°РЅРёС‡РёС‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РїР°РјСЏС‚Рё РїСЂРё СѓРїР°РєРѕРІРєРµ
 void LZMA_METHOD::SetCompressionMem (MemSize mem)
 {
   if (mem<=0)  return;
   SetDictionary (calcDictSize (this, mem));
 }
 
-// Ограничить использование памяти при распаковке
+// РћРіСЂР°РЅРёС‡РёС‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РїР°РјСЏС‚Рё РїСЂРё СЂР°СЃРїР°РєРѕРІРєРµ
 void LZMA_METHOD::SetDecompressionMem (MemSize mem)
 {
   if (mem<=0)  return;
   SetDictionary (mem);
 }
 
-// Установить размер словаря.
+// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·РјРµСЂ СЃР»РѕРІР°СЂСЏ.
 void LZMA_METHOD::SetDictionary (MemSize mem)
 {
   if (mem<=0)  return;
-  // Ограничим размер словаря чтобы сжатие влезало в 4гб памяти :)
+  // РћРіСЂР°РЅРёС‡РёРј СЂР°Р·РјРµСЂ СЃР»РѕРІР°СЂСЏ С‡С‚РѕР±С‹ СЃР¶Р°С‚РёРµ РІР»РµР·Р°Р»Рѕ РІ 4РіР± РїР°РјСЏС‚Рё :)
   dictionarySize = mymin (mem, roundDown (calcDictSize (this, UINT_MAX), mb));
-  // Словарь - минимум 32 кб, по возможности округлённый до мегабайт
+  // РЎР»РѕРІР°СЂСЊ - РјРёРЅРёРјСѓРј 32 РєР±, РїРѕ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РѕРєСЂСѓРіР»С‘РЅРЅС‹Р№ РґРѕ РјРµРіР°Р±Р°Р№С‚
   dictionarySize = mymax (32*kb, dictionarySize);
   dictionarySize = dictionarySize < 2*mb? dictionarySize
                                         : roundDown(dictionarySize, 1*mb);
@@ -487,18 +487,18 @@ MemSize LZMA_METHOD::GetDecompressionMem (void)
   return dictionarySize + RangeDecoderBufferSize(dictionarySize);
 }
 
-// Конструирует объект типа LZMA_METHOD с заданными параметрами упаковки
-// или возвращает NULL, если это другой метод сжатия или допущена ошибка в параметрах
+// РљРѕРЅСЃС‚СЂСѓРёСЂСѓРµС‚ РѕР±СЉРµРєС‚ С‚РёРїР° LZMA_METHOD СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё СѓРїР°РєРѕРІРєРё
+// РёР»Рё РІРѕР·РІСЂР°С‰Р°РµС‚ NULL, РµСЃР»Рё СЌС‚Рѕ РґСЂСѓРіРѕР№ РјРµС‚РѕРґ СЃР¶Р°С‚РёСЏ РёР»Рё РґРѕРїСѓС‰РµРЅР° РѕС€РёР±РєР° РІ РїР°СЂР°РјРµС‚СЂР°С…
 COMPRESSION_METHOD* parse_LZMA (char** parameters)
 {
   if (strcmp (parameters[0], "lzma") == 0) {
-    // Если название метода (нулевой параметр) - "lzma", то разберём остальные параметры
+    // Р•СЃР»Рё РЅР°Р·РІР°РЅРёРµ РјРµС‚РѕРґР° (РЅСѓР»РµРІРѕР№ РїР°СЂР°РјРµС‚СЂ) - "lzma", С‚Рѕ СЂР°Р·Р±РµСЂС‘Рј РѕСЃС‚Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
 
     LZMA_METHOD *p = new LZMA_METHOD;
     p->matchFinder = INT_MAX;
-    int error = 0;  // Признак того, что при разборе параметров произошла ошибка
+    int error = 0;  // РџСЂРёР·РЅР°Рє С‚РѕРіРѕ, С‡С‚Рѕ РїСЂРё СЂР°Р·Р±РѕСЂРµ РїР°СЂР°РјРµС‚СЂРѕРІ РїСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР°
 
-    // Переберём все параметры метода (или выйдем раньше при возникновении ошибки при разборе очередного параметра)
+    // РџРµСЂРµР±РµСЂС‘Рј РІСЃРµ РїР°СЂР°РјРµС‚СЂС‹ РјРµС‚РѕРґР° (РёР»Рё РІС‹Р№РґРµРј СЂР°РЅСЊС€Рµ РїСЂРё РІРѕР·РЅРёРєРЅРѕРІРµРЅРёРё РѕС€РёР±РєРё РїСЂРё СЂР°Р·Р±РѕСЂРµ РѕС‡РµСЂРµРґРЅРѕРіРѕ РїР°СЂР°РјРµС‚СЂР°)
     while (*++parameters) {
       char *param = *parameters;  bool optional = param[0]=='*';  optional && param++;
            if (start_from (param, "d"))    p->dictionarySize    = parseMem (param+1, &error);
@@ -517,9 +517,9 @@ COMPRESSION_METHOD* parse_LZMA (char** parameters)
       else if (strequ (param, "max"))      p->algorithm = 1,  p->matchFinder==INT_MAX && (p->matchFinder = kBT4),  p->numFastBytes = 128,  p->matchFinderCycles = 0;
       else if (strequ (param, "ultra"))    p->algorithm = 1,  p->matchFinder==INT_MAX && (p->matchFinder = kBT4),  p->numFastBytes = 128,  p->matchFinderCycles = 128;
       else {
-unnamed:// Сюда мы попадаем, если в параметре опущено его наименование
-        // Это может быть строка - имя MatchFinder'а, целое число - значение numFastBytes,
-        // или обозначение памяти - значение dictionarySize
+unnamed:// РЎСЋРґР° РјС‹ РїРѕРїР°РґР°РµРј, РµСЃР»Рё РІ РїР°СЂР°РјРµС‚СЂРµ РѕРїСѓС‰РµРЅРѕ РµРіРѕ РЅР°РёРјРµРЅРѕРІР°РЅРёРµ
+        // Р­С‚Рѕ РјРѕР¶РµС‚ Р±С‹С‚СЊ СЃС‚СЂРѕРєР° - РёРјСЏ MatchFinder'Р°, С†РµР»РѕРµ С‡РёСЃР»Рѕ - Р·РЅР°С‡РµРЅРёРµ numFastBytes,
+        // РёР»Рё РѕР±РѕР·РЅР°С‡РµРЅРёРµ РїР°РјСЏС‚Рё - Р·РЅР°С‡РµРЅРёРµ dictionarySize
         error = 0;
         int n = FindMatchFinder (param);
         if (n>=0)
@@ -532,13 +532,13 @@ unnamed:// Сюда мы попадаем, если в параметре опущено его наименование
         }
       }
       if (!optional)
-        if (error || p->matchFinder<0)  {delete p; return NULL;}  // Ошибка при парсинге параметров метода
+        if (error || p->matchFinder<0)  {delete p; return NULL;}  // РћС€РёР±РєР° РїСЂРё РїР°СЂСЃРёРЅРіРµ РїР°СЂР°РјРµС‚СЂРѕРІ РјРµС‚РѕРґР°
     }
     if (p->matchFinder == INT_MAX)
       p->matchFinder = kHT4;   // default match finder
     return p;
   } else
-    return NULL;   // Это не метод lzma
+    return NULL;   // Р­С‚Рѕ РЅРµ РјРµС‚РѕРґ lzma
 }
 
-static int LZMA_x = AddCompressionMethod (parse_LZMA);   // Зарегистрируем парсер метода LZMA
+static int LZMA_x = AddCompressionMethod (parse_LZMA);   // Р—Р°СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РїР°СЂСЃРµСЂ РјРµС‚РѕРґР° LZMA

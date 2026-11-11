@@ -38,3 +38,5 @@ Available options:
 macOS (Apple Silicon or Intel) builds with the stock Xcode command line tools: just run `make`.
 
 Supports FreeArc 0.666 `4x4:...` blocks (e.g. `rep:96mb+4x4:tor:16mb:c3`), which some repack installers use.
+
+Sources are UTF-8 (the original FreeArc sources were CP1251/CP866).

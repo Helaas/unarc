@@ -10,17 +10,17 @@ extern "C" {
 #define INIT_CRC 0xffffffff
 
 // Environment.cpp
-int long_path_size (void);                                 // Максимальная длина имени файла
-void FormatDateTime (char *buf, int bufsize, time_t t);    // Отформатировать время/дату для команды листинга
-CFILENAME GetExeName (CFILENAME buf, int bufsize);         // Вернуть имя исполняемого файла программы
-unsigned GetPhysicalMemory (void);                         // Объём физической памяти компьютера
-unsigned GetMaxMemToAlloc (void);                          // Макс. объём памяти который мы можем выделить в адресном пространстве нашего процесса
-unsigned GetAvailablePhysicalMemory (void);                // Объём свободной физической памяти компьютера
-void TestMalloc (void);                                    // Печатает статистику свободной памяти
-int GetProcessorsCount (void);                             // Общее количество процессоров (точнее, физических ядер) в системе. Используется для определения того, сколько "тяжёлых" вычислительных потоков целесообразно запустить в программе
-uint UpdateCRC (void *Addr, uint Size, uint StartCRC);     // Обновить CRC содержимым блока данных
-uint CalcCRC (void *Addr, uint Size);                      // Вычислить CRC блока данных
-void memxor (char *dest, char *src, uint size);            // От-xor-ить два блока данных
+int long_path_size (void);                                 // РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° РёРјРµРЅРё С„Р°Р№Р»Р°
+void FormatDateTime (char *buf, int bufsize, time_t t);    // РћС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°С‚СЊ РІСЂРµРјСЏ/РґР°С‚Сѓ РґР»СЏ РєРѕРјР°РЅРґС‹ Р»РёСЃС‚РёРЅРіР°
+CFILENAME GetExeName (CFILENAME buf, int bufsize);         // Р’РµСЂРЅСѓС‚СЊ РёРјСЏ РёСЃРїРѕР»РЅСЏРµРјРѕРіРѕ С„Р°Р№Р»Р° РїСЂРѕРіСЂР°РјРјС‹
+unsigned GetPhysicalMemory (void);                         // РћР±СЉС‘Рј С„РёР·РёС‡РµСЃРєРѕР№ РїР°РјСЏС‚Рё РєРѕРјРїСЊСЋС‚РµСЂР°
+unsigned GetMaxMemToAlloc (void);                          // РњР°РєСЃ. РѕР±СЉС‘Рј РїР°РјСЏС‚Рё РєРѕС‚РѕСЂС‹Р№ РјС‹ РјРѕР¶РµРј РІС‹РґРµР»РёС‚СЊ РІ Р°РґСЂРµСЃРЅРѕРј РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ РЅР°С€РµРіРѕ РїСЂРѕС†РµСЃСЃР°
+unsigned GetAvailablePhysicalMemory (void);                // РћР±СЉС‘Рј СЃРІРѕР±РѕРґРЅРѕР№ С„РёР·РёС‡РµСЃРєРѕР№ РїР°РјСЏС‚Рё РєРѕРјРїСЊСЋС‚РµСЂР°
+void TestMalloc (void);                                    // РџРµС‡Р°С‚Р°РµС‚ СЃС‚Р°С‚РёСЃС‚РёРєСѓ СЃРІРѕР±РѕРґРЅРѕР№ РїР°РјСЏС‚Рё
+int GetProcessorsCount (void);                             // РћР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕС†РµСЃСЃРѕСЂРѕРІ (С‚РѕС‡РЅРµРµ, С„РёР·РёС‡РµСЃРєРёС… СЏРґРµСЂ) РІ СЃРёСЃС‚РµРјРµ. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ С‚РѕРіРѕ, СЃРєРѕР»СЊРєРѕ "С‚СЏР¶С‘Р»С‹С…" РІС‹С‡РёСЃР»РёС‚РµР»СЊРЅС‹С… РїРѕС‚РѕРєРѕРІ С†РµР»РµСЃРѕРѕР±СЂР°Р·РЅРѕ Р·Р°РїСѓСЃС‚РёС‚СЊ РІ РїСЂРѕРіСЂР°РјРјРµ
+uint UpdateCRC (void *Addr, uint Size, uint StartCRC);     // РћР±РЅРѕРІРёС‚СЊ CRC СЃРѕРґРµСЂР¶РёРјС‹Рј Р±Р»РѕРєР° РґР°РЅРЅС‹С…
+uint CalcCRC (void *Addr, uint Size);                      // Р’С‹С‡РёСЃР»РёС‚СЊ CRC Р±Р»РѕРєР° РґР°РЅРЅС‹С…
+void memxor (char *dest, char *src, uint size);            // РћС‚-xor-РёС‚СЊ РґРІР° Р±Р»РѕРєР° РґР°РЅРЅС‹С…
 int systemRandomData (char *rand_buf, int rand_size);
 
 #ifdef FREEARC_WIN
@@ -28,9 +28,9 @@ DWORD RegistryDeleteTree(HKEY hStartKey, LPTSTR pKeyName);  // Delete entrire su
 #endif
 
 // GuiEnvironment.cpp
-int BrowseForFolder(TCHAR *prompt, TCHAR *in_filename, TCHAR *out_filename);                      // Дать пользователю выбрать каталог
-int BrowseForFile(TCHAR *prompt, TCHAR *filters, TCHAR *in_filename, TCHAR *out_filename);        // Дать пользователю выбрать файл
-void GuiFormatDateTime (time_t t, char *buf, int bufsize, char *date_format, char *time_format);  // Превратить время/дату файла в строку в соответствии с настройками locale или заданными форматами времени и даты
+int BrowseForFolder(TCHAR *prompt, TCHAR *in_filename, TCHAR *out_filename);                      // Р”Р°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РІС‹Р±СЂР°С‚СЊ РєР°С‚Р°Р»РѕРі
+int BrowseForFile(TCHAR *prompt, TCHAR *filters, TCHAR *in_filename, TCHAR *out_filename);        // Р”Р°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РІС‹Р±СЂР°С‚СЊ С„Р°Р№Р»
+void GuiFormatDateTime (time_t t, char *buf, int bufsize, char *date_format, char *time_format);  // РџСЂРµРІСЂР°С‚РёС‚СЊ РІСЂРµРјСЏ/РґР°С‚Сѓ С„Р°Р№Р»Р° РІ СЃС‚СЂРѕРєСѓ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РЅР°СЃС‚СЂРѕР№РєР°РјРё locale РёР»Рё Р·Р°РґР°РЅРЅС‹РјРё С„РѕСЂРјР°С‚Р°РјРё РІСЂРµРјРµРЅРё Рё РґР°С‚С‹
 
 #ifdef  __cplusplus
 }
