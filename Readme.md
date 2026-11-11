@@ -34,3 +34,7 @@ Available options:
 - First check `Makefile` and fix `DEFINES`: remove `-DFREEARC_64BIT` on 32 bit platform
 - Then run `make` or `make -j N`
 - Install manually
+
+macOS (Apple Silicon or Intel) builds with the stock Xcode command line tools: just run `make`.
+
+Supports FreeArc 0.666 `4x4:...` blocks (e.g. `rep:96mb+4x4:tor:16mb:c3`), which some repack installers use.

@@ -137,6 +137,11 @@ public:
 	ret = pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_JOINABLE);
 	if (ret) return false;
 
+	// macOS gives secondary threads only 512 KB of stack, but the Unix CHECK() macro puts
+	// a 256 KB message buffer on the stack. Use the 8 MB that Linux gives by default.
+	ret = pthread_attr_setstacksize(&attr, 8*1024*1024);
+	if (ret) return false;
+
 	ret = pthread_create(&_tid, &attr, (void * (*)(void *))startAddress, parameter);
 
 	/* ret2 = */ pthread_attr_destroy(&attr);

@@ -8,10 +8,25 @@
 enum { UNIT_SIZE=12, N1=4, N2=4, N3=4, N4=(128+3-1*N1-2*N2-3*N3)/4,
         N_INDEXES=N1+N2+N3+N4 };
 
+/* The model keeps pointers inside its 12-byte memory units. Native 64-bit pointers
+ * would change the unit size and hence the moments when memory runs out, so
+ * archives made by 32-bit FreeArc would no longer decode. Pointers stored in the
+ * heap are therefore kept as 32-bit offsets from PtrBase (0 = NULL), which gives
+ * every platform the original 32-bit memory layout and model behaviour.            */
+static BYTE* PtrBase;
 #pragma pack(1)
+template <class T> struct Ptr32 {
+    DWORD Offset;
+    T* get() const                  { return Offset ? (T*) (PtrBase+Offset) : NULL; }
+    operator T* () const            { return get(); }
+    template <class U> explicit operator U* () const { return (U*) get(); }
+    T* operator-> () const          { return get(); }
+    Ptr32& operator= (T* p)         { Offset = p ? (DWORD) ((BYTE*) p-PtrBase) : 0;  return *this; }
+} _PACK_ATTR;
+
 struct BLK_NODE {
     DWORD Stamp;
-    BLK_NODE* next;
+    Ptr32<BLK_NODE> next;
     BOOL   avail()      const { return (next != NULL); }
     void    link(BLK_NODE* p) { p->next=next; next=p; }
     void  unlink()            { next=next->next; }
@@ -23,6 +38,7 @@ struct BLK_NODE {
 } BList[N_INDEXES];
 struct MEM_BLK: public BLK_NODE { DWORD NU; } _PACK_ATTR;
 #pragma pack()
+static_assert(sizeof(BLK_NODE) == 8 && sizeof(MEM_BLK) == UNIT_SIZE, "PPMd needs the 32-bit unit layout");
 
 static BYTE Indx2Units[N_INDEXES], Units2Indx[128]; // constants
 static DWORD GlueCount, SubAllocatorSize=0;
@@ -36,7 +52,7 @@ inline void PrefetchData(void* Addr)
 }
 inline void BLK_NODE::insert(void* pv,int NU) {
     MEM_BLK* p=(MEM_BLK*) pv;               link(p);
-    p->Stamp=~0UL;                          p->NU=NU;
+    p->Stamp=~0U;                           p->NU=NU;
     Stamp++;
 }
 inline UINT U2B(UINT NU) { return 8*NU+4*NU; }
@@ -59,15 +75,19 @@ DWORD _STDCALL GetUsedMemory()
 }
 void _STDCALL StopSubAllocator() {
     if ( SubAllocatorSize ) {
-        SubAllocatorSize=0;                 BigFree(HeapStart);
+        SubAllocatorSize=0;                 BigFree(PtrBase);
     }
 }
 BOOL _STDCALL StartSubAllocator(UINT t)
 {
     if (SubAllocatorSize == t)              return TRUE;
     StopSubAllocator();
-    HeapStart = (BYTE*) BigAlloc(t);
-    if (HeapStart == NULL)                  return FALSE;
+    // One zeroed spare unit on each side of the heap: the leading one keeps every
+    // Ptr32 offset non-zero, and GlueFreeBlocks() peeks at the unit just past the end
+    PtrBase = (BYTE*) BigAlloc(t+2*UNIT_SIZE);
+    if (PtrBase == NULL)                    return FALSE;
+    HeapStart = PtrBase+UNIT_SIZE;
+    memset(PtrBase,0,UNIT_SIZE);            memset(HeapStart+t,0,UNIT_SIZE);
     SubAllocatorSize=t;                     return TRUE;
 }
 static inline void InitSubAllocator()
@@ -86,7 +106,7 @@ static void GlueFreeBlocks()
             while ( BList[i].avail() ) {
                 p=(MEM_BLK*) BList[i].remove();
                 if ( !p->NU )               continue;
-                while ((p1=p+p->NU)->Stamp == ~0UL) {
+                while ((p1=p+p->NU)->Stamp == ~0U) {
                     p->NU += p1->NU;        p1->NU=0;
                 }
                 p0->link(p);                p0=p;
@@ -171,7 +191,7 @@ inline void FreeUnits(void* ptr,UINT NU) {
 inline void SpecialFreeUnit(void* ptr)
 {
     if ((BYTE*) ptr != UnitsStart)          BList->insert(ptr,1);
-    else { *(DWORD*) ptr=~0UL;              UnitsStart += UNIT_SIZE; }
+    else { *(DWORD*) ptr=~0U;               UnitsStart += UNIT_SIZE; }
 }
 inline void* MoveUnitsUp(void* OldPtr,UINT NU)
 {
@@ -188,7 +208,7 @@ static inline void ExpandTextArea()
 {
     BLK_NODE* p;
     UINT Count[N_INDEXES];                  memset(Count,0,sizeof(Count));
-    while ((p=(BLK_NODE*) UnitsStart)->Stamp == ~0UL) {
+    while ((p=(BLK_NODE*) UnitsStart)->Stamp == ~0U) {
         MEM_BLK* pm=(MEM_BLK*) p;           UnitsStart=(BYTE*) (pm+pm->NU);
         Count[Units2Indx[pm->NU-1]]++;      pm->Stamp=0;
     }

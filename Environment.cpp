@@ -229,13 +229,28 @@ DWORD RegistryDeleteTree(HKEY hStartKey, LPTSTR pKeyName)
 
 
 #include <unistd.h>
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#else
 #include <sys/sysinfo.h>
+#endif
 
 unsigned GetPhysicalMemory (void)
 {
+#ifdef __APPLE__
+  unsigned long long mem = 0;
+  size_t len = sizeof(mem);
+  int mib[2] = {CTL_HW, HW_MEMSIZE};
+  if (sysctl(mib, 2, &mem, &len, NULL, 0) != 0)  mem = 0;
+  // GetPhysicalMemory() returns 32-bit unsigned, so clamp instead of truncating
+  // (truncation wrapped large machines to 0 and forced the broken "tempfile" path)
+  if (mem > (unsigned long long)UINT_MAX)  mem = UINT_MAX;
+  return (unsigned)mem;
+#else
   struct sysinfo si;
     sysinfo(&si);
   return si.totalram*si.mem_unit;
+#endif
 }
 
 unsigned GetMaxMemToAlloc (void)
@@ -247,14 +262,22 @@ unsigned GetMaxMemToAlloc (void)
 
 unsigned GetAvailablePhysicalMemory (void)
 {
+#ifdef __APPLE__
+  return GetPhysicalMemory();
+#else
   struct sysinfo si;
     sysinfo(&si);
   return si.freeram*si.mem_unit;
+#endif
 }
 
 int GetProcessorsCount (void)
 {
+#ifdef __APPLE__
+  return (int)sysconf(_SC_NPROCESSORS_ONLN);
+#else
   return get_nprocs();
+#endif
 }
 
 #endif // Windows/Unix

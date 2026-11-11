@@ -33,9 +33,10 @@ static struct PPM_CONTEXT {                 // Notes:
     WORD SummFreq;                          //  number of symbols minus 1
     struct STATE {                          // 2. sizeof(WORD) > sizeof(BYTE)
         BYTE Symbol, Freq;                  // 3. contexts example:
-        PPM_CONTEXT* Successor;             // MaxOrder:
-    } _PACK_ATTR * Stats;                   //  ABCD    context
-    PPM_CONTEXT* Suffix;                    //   BCD    suffix
+        Ptr32<PPM_CONTEXT> Successor;       // MaxOrder:
+    } _PACK_ATTR;                           //  ABCD    context
+    Ptr32<STATE> Stats;
+    Ptr32<PPM_CONTEXT> Suffix;              //   BCD    suffix
     inline void encodeBinSymbol(int symbol);//   BCDE   successor
     inline void   encodeSymbol1(int symbol);// other orders:
     inline void   encodeSymbol2(int symbol);//   BCD    context
@@ -52,6 +53,8 @@ static struct PPM_CONTEXT {                 // Notes:
     STATE& oneState() const { return (STATE&) SummFreq; }
 } _PACK_ATTR* MaxContext;
 #pragma pack()
+static_assert(sizeof(PPM_CONTEXT) == UNIT_SIZE && 2*sizeof(PPM_CONTEXT::STATE) == UNIT_SIZE,
+              "PPMd needs the 32-bit unit layout");
 
 static BYTE NS2BSIndx[256], QTable[260];    // constants
 static PPM_CONTEXT::STATE* FoundState;      // found next state transition

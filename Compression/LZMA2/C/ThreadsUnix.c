@@ -198,6 +198,10 @@ WRes Thread_Create(CThread *thread, THREAD_FUNC_RET_TYPE (THREAD_FUNC_CALL_TYPE 
 	ret = pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_JOINABLE);
 	if (ret) return ret;
 
+	/* macOS default secondary-thread stack is only 512 KB; match Linux's 8 MB */
+	ret = pthread_attr_setstacksize(&attr, 8*1024*1024);
+	if (ret) return ret;
+
 	ret = pthread_create(&thread->_tid, &attr, (void * (*)(void *))startAddress, parameter);
 
 	/* ret2 = */ pthread_attr_destroy(&attr);

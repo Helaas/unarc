@@ -9,19 +9,24 @@ LINKOBJ_FAR_PLUGIN = $(OBJDIR)/Environment.o $(OBJDIR)/Common.o $(OBJDIR)/Compre
 LINKOBJ_TINY = $(LINKOBJ_FAR_PLUGIN) $(OBJDIR)/C_BCJ.o $(OBJDIR)/C_Dict.o $(OBJDIR)/C_Delta.o
 LINKOBJ_MINI = $(LINKOBJ_TINY) $(OBJDIR)/C_REP.o $(OBJDIR)/C_LZP.o $(OBJDIR)/C_PPMD.o $(OBJDIR)/C_External.o
 LINKOBJ = $(LINKOBJ_MINI) $(OBJDIR)/C_MM.o $(OBJDIR)/C_TTA.o \
-          $(OBJDIR)/C_Tornado.o $(OBJDIR)/C_GRZip.o
+          $(OBJDIR)/C_Tornado.o $(OBJDIR)/C_GRZip.o $(OBJDIR)/C_4x4.o
 
 UNARC = ArcStructure.h ArcCommand.h ArcProcess.h
 CUI = CUI.h
 HEADERS =  Compression/Compression.h Compression/Common.h
 
+ifeq ($(shell uname -s),Darwin)
+# macOS: no librt, libc++ is linked by clang++ itself, and ld strips via -dead_strip
+UNIX_LINK_FLAGS = -lpthread -Wl,-dead_strip
+else
 UNIX_LINK_FLAGS = -L$(LIBDIR) -lstdc++ -lrt -lpthread -s
+endif
 
 
 CODE_FLAGS  = -fno-exceptions -fno-rtti -Wall \
               -Wno-unknown-pragmas -Wno-sign-compare -Wno-conversion
 OPT_FLAGS   = -ffast-math \
-              -fomit-frame-pointer -fstrict-aliasing \
+              -fomit-frame-pointer -fno-strict-aliasing \
               -fforce-addr
 DEBUG_FLAGS = -g0
 CFLAGS = $(CODE_FLAGS) $(OPT_FLAGS) -O2 $(DEBUG_FLAGS) $(DEFINES) $(Extractor_DEFINES)
@@ -81,4 +86,7 @@ $(OBJDIR)/C_Tornado.o: Compression/Tornado/C_Tornado.cpp Compression/Tornado/C_T
 	$(CXX) -c $(CFLAGS) -o $*.o $<
 
 $(OBJDIR)/C_GRZip.o: Compression/GRZip/C_GRZip.cpp Compression/GRZip/C_GRZip.h $(HEADERS)
+	$(CXX) -c $(CFLAGS) -o $*.o $<
+
+$(OBJDIR)/C_4x4.o: Compression/4x4/C_4x4.cpp Compression/4x4/C_4x4.h $(HEADERS)
 	$(CXX) -c $(CFLAGS) -o $*.o $<
